@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Sprite Sheet to GIF Converter Online | No Watermark</title>
+    <meta name="description" content="Easily convert your game sprite sheets into animated GIFs online. Set rows, columns, and frame delay. Free, fast, and no watermark. Perfect for game developers.">
+    <meta name="keywords" content="sprite sheet to gif, convert sprite to gif, sprite animator, game dev tools, animated gif creator, sprite sheet slicer">
+    <meta name="robots" content="index, follow">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Schema Markup for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Sprite Sheet to GIF Converter",
+      "operatingSystem": "Any",
+      "applicationCategory": "MultimediaApplication",
+      "description": "A free online tool to convert 2D game sprite sheets into animated GIFs. Allows users to slice by rows and columns and set custom frame rates.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "What is a Sprite Sheet?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A sprite sheet is a single image file that contains multiple smaller graphics (frames) arranged in a grid. They are widely used in 2D video games to optimize memory usage and performance."
+        }
+      }, {
+        "@type": "Question",
+        "name": "How do I convert a Sprite Sheet to an animated GIF?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Simply upload your sprite sheet image to our tool, specify the number of rows and columns, set the animation speed (frame delay), and click 'Generate GIF'. You can then download your animation."
+        }
+      }, {
+        "@type": "Question",
+        "name": "Is this tool free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! Our Sprite Sheet to GIF converter is 100% free, works entirely in your browser, and adds no watermarks to your final GIF."
+        }
+      }]
+    }
+    </script>
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
+            --box-bg: #ffffff;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+        }
+        .tool-container {
+            background: var(--box-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 30px;
+            margin-top: -40px;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+        .preview-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        .content-section {
+            background: var(--box-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            margin-bottom: 40px;
+        }
+        h2 { color: var(--primary); font-weight: 700; margin-top: 30px;}
+        h3 { font-weight: 600; margin-top: 20px;}
+        .faq-item { margin-bottom: 20px; }
+        .faq-question { font-weight: bold; font-size: 1.1em; color: var(--text-color); }
+        .btn-primary { background-color: var(--primary); border-color: var(--primary); }
+        #loading { display: none; color: var(--primary); font-weight: bold; }
+        #downloadArea { display: none; margin-top: 20px; text-align: center; }
+    </style>
+
+    <!-- JS Libraries for GIF Creation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Sprite Sheet to GIF Converter</h1>
+            <p class="lead">Instantly turn your 2D game sprite sheets into animated GIFs. No watermarks, 100% free.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Application Tool -->
+        <section class="tool-container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="mb-3">1. Upload & Settings</h3>
+                    <div class="mb-3">
+                        <label for="spriteInput" class="form-label">Upload Sprite Sheet (PNG, JPG)</label>
+                        <input class="form-control" type="file" id="spriteInput" accept="image/png, image/jpeg">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="columns" class="form-label">Columns (X)</label>
+                            <input type="number" class="form-control" id="columns" value="4" min="1">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="rows" class="form-label">Rows (Y)</label>
+                            <input type="number" class="form-control" id="rows" value="1" min="1">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="delay" class="form-label">Frame Delay (Milliseconds)</label>
+                        <input type="number" class="form-control" id="delay" value="100" min="10">
+                        <small class="text-muted">Lower = Faster animation (e.g., 100ms = 10 fps)</small>
+                    </div>
+
+                    <button class="btn btn-primary w-100 py-2 mt-2" id="generateBtn">Generate GIF</button>
+                    
+                    <div id="loading" class="mt-3 text-center">
+                        <div class="spinner-border spinner-border-sm" role="status"></div> Processing frames...
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h3 class="mb-3">2. Preview & Download</h3>
+                    <div class="preview-box" id="previewContainer">
+                        <p class="text-muted" id="placeholderText">Upload an image to see preview</p>
+                        <canvas id="previewCanvas" style="display: none;"></canvas>
+                    </div>
+                    
+                    <div id="downloadArea">
+                        <a id="downloadLink" href="#" download="animated-sprite.gif" class="btn btn-success w-100 py-2 mt-3 fw-bold">
+                            ⬇ Download GIF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEO Long-Form Content -->
+        <article class="content-section">
+            <h2>The Ultimate Online Sprite Sheet to GIF Converter</h2>
+            <p>Welcome to the most efficient, browser-based <strong>Sprite Sheet to GIF converter</strong>. Whether you are an indie game developer, a digital artist, or a web designer, testing and showcasing your character animations is crucial. Our free tool allows you to slice any sprite sheet grid and stitch it together into a looping, shareable animated GIF in seconds.</p>
+
+            <h2>How to Convert a Sprite Sheet to an Animated GIF?</h2>
+            <p>Using our tool is incredibly straightforward. You don't need to download complex software like Photoshop or After Effects. Just follow these steps:</p>
+            <ol>
+                <li><strong>Upload your Image:</strong> Click the upload button and select your sprite sheet file (PNG with transparency is highly recommended for best results).</li>
+                <li><strong>Set Grid Dimensions:</strong> Count the number of frames across (Columns) and down (Rows) your image. Enter these numbers in the respective fields.</li>
+                <li><strong>Adjust Animation Speed:</strong> Set the "Frame Delay" in milliseconds. A standard delay is 100ms (which equals 10 frames per second). Lower numbers make the animation faster.</li>
+                <li><strong>Generate & Download:</strong> Click "Generate GIF". Our tool will process the frames locally in your browser and provide a high-quality GIF ready for download.</li>
+            </ol>
+
+            <h2>What is a Sprite Sheet?</h2>
+            <p>A sprite sheet is a single image file containing multiple smaller graphics or "frames" arranged in a grid. Instead of loading dozens of individual images for a character walking or running, a game engine loads one single sprite sheet and displays specific sections of it sequentially. This significantly reduces memory overhead and improves rendering performance in 2D video games.</p>
+
+            <h2>Why Convert Sprite Sheets to GIFs?</h2>
+            <p>While game engines (like Unity, Godot, or GameMaker) understand sprite sheets perfectly, humans and social media platforms do not. You might want to convert them for:</p>
+            <ul>
+                <li><strong>Portfolio Showcase:</strong> Displaying your animation work on ArtStation, Behance, or a personal website.</li>
+                <li><strong>Social Media:</strong> Sharing your game dev progress (DevLog) on Twitter/X, Reddit, or Discord.</li>
+                <li><strong>Quality Testing:</strong> Quickly previewing how your animation flows before writing complex code to implement it in your game.</li>
+            </ul>
+
+            <h2>Features of Our Free Converter</h2>
+            <ul>
+                <li><strong>100% Client-Side Processing:</strong> Your images are never uploaded to a server. Everything happens securely inside your browser, ensuring total privacy.</li>
+                <li><strong>Supports Transparency:</strong> Perfect for PNG sprite sheets. The transparent background is preserved in the final GIF output.</li>
+                <li><strong>No Watermarks:</strong> The GIFs you create are entirely yours. We do not stamp our logo on your hard work.</li>
+                <li><strong>Custom Frame Rates:</strong> Total control over the pacing of your animation.</li>
+            </ul>
+
+            <h2 id="faq">Frequently Asked Questions (FAQ)</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">Why is my GIF animation cutting off parts of the character?</div>
+                <p>This usually happens if the "Rows" and "Columns" numbers are incorrect. Make sure you count exactly how many frames are in the width (columns) and height (rows) of your sprite sheet. All frames in the sheet must be equally spaced and identically sized.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Can I use this on mobile?</div>
+                <p>Yes! Our tool is fully responsive and works on any modern mobile browser. However, for precise frame counting, a desktop screen might be easier to use.</p>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">What is the best format to upload?</div>
+                <p>We strongly recommend uploading <strong>PNG files</strong>. PNG preserves crisp pixel art edges and supports transparent backgrounds, which translates perfectly into animated GIFs.</p>
+            </div>
+        </article>
+    </main>
+
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <p class="mb-0">© 2023 Sprite Sheet to GIF Converter. All rights reserved.</p>
+    </footer>
+
+    <!-- Application Logic (JavaScript) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const spriteInput = document.getElementById('spriteInput');
+            const columnsInput = document.getElementById('columns');
+            const rowsInput = document.getElementById('rows');
+            const delayInput = document.getElementById('delay');
+            const generateBtn = document.getElementById('generateBtn');
+            const previewCanvas = document.getElementById('previewCanvas');
+            const placeholderText = document.getElementById('placeholderText');
+            const loading = document.getElementById('loading');
+            const downloadArea = document.getElementById('downloadArea');
+            const downloadLink = document.getElementById('downloadLink');
+
+            const ctx = previewCanvas.getContext('2d');
+            let img = new Image();
+            let animationTimer = null;
+            let currentFrame = 0;
+
+            // Load Image
+            spriteInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        startPreview();
+                    }
+                }
+                reader.readAsDataURL(file);
+            });
+
+            // Update Preview on settings change
+            [columnsInput, rowsInput, delayInput].forEach(input => {
+                input.addEventListener('change', () => {
+                    if (img.src) startPreview();
+                });
+            });
+
+            // Live Animation Preview Logic
+            function startPreview() {
+                if (animationTimer) clearInterval(animationTimer);
+                
+                placeholderText.style.display = 'none';
+                previewCanvas.style.display = 'block';
+
+                const cols = parseInt(columnsInput.value) || 1;
+                const rows = parseInt(rowsInput.value) || 1;
+                const delay = parseInt(delayInput.value) || 100;
+
+                const frameWidth = img.width / cols;
+                const frameHeight = img.height / rows;
+                const totalFrames = cols * rows;
+
+                previewCanvas.width = frameWidth;
+                previewCanvas.height = frameHeight;
+
+                currentFrame = 0;
+
+                animationTimer = setInterval(() => {
+                    const col = currentFrame % cols;
+                    const row = Math.floor(currentFrame / cols);
+
+                    ctx.clearRect(0, 0, frameWidth, frameHeight);
+                    ctx.drawImage(
+                        img,
+                        col * frameWidth, row * frameHeight, frameWidth, frameHeight, // Source
+                        0, 0, frameWidth, frameHeight // Destination
+                    );
+
+                    currentFrame = (currentFrame + 1) % totalFrames;
+                }, delay);
+            }
+
+            // Generate GIF Logic
+            generateBtn.addEventListener('click', () => {
+                if (!img.src) {
+                    alert("Please upload a sprite sheet first!");
+                    return;
+                }
+
+                loading.style.display = 'block';
+                downloadArea.style.display = 'none';
+                generateBtn.disabled = true;
+
+                setTimeout(() => {
+                    createGIF();
+                }, 100); // Small delay to allow UI to show loading spinner
+            });
+
+            function createGIF() {
+                const cols = parseInt(columnsInput.value) || 1;
+                const rows = parseInt(rowsInput.value) || 1;
+                const delay = parseInt(delayInput.value) || 100;
+
+                const frameWidth = img.width / cols;
+                const frameHeight = img.height / rows;
+                const totalFrames = cols * rows;
+
+                // Initialize GIF object
+                const gif = new GIF({
+                    workers: 2,
+                    quality: 10,
+                    width: frameWidth,
+                    height: frameHeight,
+                    transparent: 0x000000, // Handle transparency
+                    workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js' // CDN worker
+                });
+
+                // Create a temporary canvas to extract frames
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = frameWidth;
+                tempCanvas.height = frameHeight;
+                const tempCtx = tempCanvas.getContext('2d');
+
+                for (let i = 0; i < totalFrames; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+
+                    tempCtx.clearRect(0, 0, frameWidth, frameHeight);
+                    tempCtx.drawImage(
+                        img,
+                        col * frameWidth, row * frameHeight, frameWidth, frameHeight,
+                        0, 0, frameWidth, frameHeight
+                    );
+
+                    // Add frame to GIF
+                    gif.addFrame(tempCtx, {copy: true, delay: delay});
+                }
+
+                gif.on('finished', function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    downloadLink.href = url;
+                    
+                    loading.style.display = 'none';
+                    downloadArea.style.display = 'block';
+                    generateBtn.disabled = false;
+                });
+
+                gif.render();
+            }
+        });
+    </script>
+</body>
+</html>
